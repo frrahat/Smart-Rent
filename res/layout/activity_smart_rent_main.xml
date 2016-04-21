@@ -1,0 +1,53 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/background_dark"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.frrahat.smartrent.SmartRentMainActivity" >
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/buttonSeeCurrentLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/custom_button"
+            android:text="@string/txtGetCurrentLocation" />
+
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/space_between_buttons" />
+
+        <Button
+            android:id="@+id/buttonHireATaxi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/custom_button"
+            android:text="@string/txtHireATaxi" />
+		
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/activity_vertical_margin" />
+        
+        <Button
+            android:id="@+id/buttonIfDriver"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="@string/txtIfDriver"
+            android:textColor="@color/yellow1" />
+
+    </LinearLayout>
+</RelativeLayout>
