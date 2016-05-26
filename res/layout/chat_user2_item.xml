@@ -6,7 +6,7 @@
     android:paddingBottom="5dp"
     android:paddingTop="5dp">
 
-    <in.co.madhur.chatbubblesdemo.widgets.ChatLayout
+    <com.frrahat.smartrent.widgets.ChatLayout
         android:layout_marginLeft="20dp"
         android:layout_width="wrap_content" android:id="@+id/bubble" android:layout_alignParentRight="true" android:layout_alignParentEnd="true"
         android:layout_height="wrap_content" android:background="@drawable/balloon_outgoing_normal">
@@ -50,9 +50,9 @@
             android:layout_toLeftOf="@id/time_text"
 
             android:autoLink="web"
-            android:text="Rahul Agrawal is a good boy but he does not know what he wants." />
+            android:text="foo" />
 
 
 
-    </in.co.madhur.chatbubblesdemo.widgets.ChatLayout>
+    </com.frrahat.smartrent.widgets.ChatLayout>
 </RelativeLayout>

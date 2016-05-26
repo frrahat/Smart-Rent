@@ -89,7 +89,7 @@ public class DestinationInputActivity extends Activity {
 		//setup passenger ID
 		if(passenger.getPassengerID()==null){//new ID
 			passenger.setPassengerID(
-					DatabaseHandler.getNewID(DatabaseHandler.getPassengersRef(),
+					DatabaseHandler.getNewID(DatabaseHandler.getPassengersRef(getApplicationContext()),
 							"passengerID", passenger));
 			
 			FileHandler.savePassengerToLocalStorage(getApplicationContext(), passenger);
@@ -99,7 +99,7 @@ public class DestinationInputActivity extends Activity {
 		
 		TaxiRequest taxiRequest=new TaxiRequest(addressEditText.getText().toString(), passenger.getPassengerID(), System.currentTimeMillis());
 		//pushing new request
-		String requestID=DatabaseHandler.getNewID(DatabaseHandler.getRequestsRef(), "requestID", taxiRequest);
+		String requestID=DatabaseHandler.getNewID(DatabaseHandler.getRequestsRef(getApplicationContext()), "requestID", taxiRequest);
 		
 		//MessageThread thread=new MessageThread(requestID, System.currentTimeMillis(), true);
 		//pushing new thread

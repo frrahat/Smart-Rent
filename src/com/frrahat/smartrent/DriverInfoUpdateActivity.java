@@ -144,11 +144,11 @@ public class DriverInfoUpdateActivity extends Activity {
 	
 	private void updateDatabase(){
 		if(driver.getDriverID()==null){// new driver
-			String driverID=DatabaseHandler.getNewID(DatabaseHandler.getDriversRef(),"driverID",driver);
+			String driverID=DatabaseHandler.getNewID(DatabaseHandler.getDriversRef(getApplicationContext()),"driverID",driver);
 			driver.setDriverID(driverID);
 			updateDriverIDtextView();
 		}else{
-			Query queryRef=DatabaseHandler.getDriversRef().orderByChild("driverID").equalTo(driver.getDriverID());
+			Query queryRef=DatabaseHandler.getDriversRef(getApplicationContext()).orderByChild("driverID").equalTo(driver.getDriverID());
 			
 			queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
 				

@@ -16,23 +16,33 @@ public class DatabaseHandler {
 		rootRef=new Firebase(superRootRefUrl).child("smartRent");
 	}
 	
-	public static Firebase getRootRef(){
+	public static Firebase getRootRef(Context context){
+		if(rootRef==null)
+			initialize(context);
 		return rootRef;
 	}
 	
-	public static Firebase getDriversRef(){
+	public static Firebase getDriversRef(Context context){
+		if(rootRef==null)
+			initialize(context);
 		return rootRef.child("Drivers");
 	}
 	
-	public static Firebase getPassengersRef(){
+	public static Firebase getPassengersRef(Context context){
+		if(rootRef==null)
+			initialize(context);
 		return rootRef.child("Passengers");
 	}
 	
-	public static Firebase getRequestsRef(){
+	public static Firebase getRequestsRef(Context context){
+		if(rootRef==null)
+			initialize(context);
 		return rootRef.child("Requests");
 	}
 	
-	public static Firebase getThreadsRef(){
+	public static Firebase getThreadsRef(Context context){
+		if(rootRef==null)
+			initialize(context);
 		return rootRef.child("Threads");
 	}
 	

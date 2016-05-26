@@ -53,7 +53,7 @@ public class RequestListActivity extends Activity {
 
 			LayoutInflater layoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-			@SuppressLint("InflateParams")
+			@SuppressLint({ "InflateParams", "SimpleDateFormat" })
 			@Override
 			public View getView(int position, View view, ViewGroup parent) {
 				if (view == null) {
@@ -72,10 +72,7 @@ public class RequestListActivity extends Activity {
 				SimpleDateFormat sdf = new SimpleDateFormat("dd MMM,yyyy hh:mm a");    
 				Date resultdate = new Date(request.getRequestTime());				
 				textView3.setText("Time : "+sdf.format(resultdate));
-				
-				if(request.isAccepted()){
-					linearLayout.setBackgroundColor(Color.YELLOW);
-				}
+
 				return view;
 			}
 
@@ -124,7 +121,7 @@ public class RequestListActivity extends Activity {
 		
 		
 		//===========================================================
-		DatabaseHandler.getRequestsRef().addChildEventListener(new ChildEventListener() {
+		DatabaseHandler.getRequestsRef(getApplicationContext()).addChildEventListener(new ChildEventListener() {
 			
 			@Override
 			public void onChildRemoved(DataSnapshot arg0) {
