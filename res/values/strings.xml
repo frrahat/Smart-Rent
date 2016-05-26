@@ -1,27 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Smart Rent</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
-    <string name="action_resetLocalDriverInfo">Reset Local Driver Info</string>
-    <string name="action_resetLocalPassengerInfo">Reset Local Passenger Info</string>
-    <string name="txtGetCurrentLocation">Get my Current Location</string>
-    <string name="txtSeeLocationInMap">View in map</string>
-    <string name="txtSendDestinationAsText">Send destination address as text</string>
-    <string name="txtHireATaxi">Hire A Taxi</string>
-    <string name="txtIfDriver"><b><u>oops! I am a driver.</u></b></string>
-    <string name="txtReadyToBeHired">Ready To Be Hired</string>
-    <string name="txtIAmReady">I am ready to be hired</string>
-    <string name="txtIAmNotReady">I am busy or not active</string>
-    <string name="title_activity_destination_input">Destination Input</string>
-    <string name="txtEnterDestination">Enter Destination : </string>
-    <string name="txtSend">Send</string>
-    <string name="txtPointOutDestInMap">Point Out Destination In Map</string>
-    <string name="title_activity_driver_info_update">Driver Info Update</string>
-    <string name="title_activity_message_list">Messages</string>
-    <string name="txtMessageInfo">Foo</string>
-    <string name="txtRequestInfo">Waiting for new requests</string>  
-    <string name="title_activity_request_list">Requests</string>
+    <string name="app_name">Chat Starter</string>
+    <string name="type_your_message">Enter msg</string>
+    <string name="NoRecent">No recent</string>
 
 </resources>

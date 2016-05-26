@@ -1,5 +1,10 @@
 package com.frrahat.smartrent;
 
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.Query;
+import com.firebase.client.ValueEventListener;
 import com.frrahat.smartrent.utils.DatabaseHandler;
 import com.frrahat.smartrent.utils.Driver;
 import com.frrahat.smartrent.utils.FileHandler;
@@ -12,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
@@ -40,8 +46,10 @@ public class DriverInfoUpdateActivity extends Activity {
 		advertiseLocationSwitch=(Switch) findViewById(R.id.switchAdvertiseLocation);
 		
 		btnUpdate=(Button) findViewById(R.id.buttonUpdate);
-		
+	    
 		setFieldsFromLocal();
+		
+		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 		
 		btnUpdate.setOnClickListener(new OnClickListener() {
 			
@@ -73,9 +81,9 @@ public class DriverInfoUpdateActivity extends Activity {
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
-		if (id == R.id.action_settings) {
+		/*if (id == R.id.action_settings) {
 			return true;
-		}
+		}*/
 		if (id == R.id.action_resetLocalDriverInfo){
 			resetLocalDriverInfo();
 			return true;
@@ -95,8 +103,11 @@ public class DriverInfoUpdateActivity extends Activity {
 			showToast("Insert Phone Number");
 			return;
 		}
-		
-		driver=new Driver(carNumber.toString(),
+		String driverID=null;
+		if(driver!=null){
+			driverID=driver.getDriverID();
+		}
+		driver=new Driver(driverID, carNumber.toString(),
 				phoneNumber.toString(), advertiseLocationSwitch.isChecked());
 		
 		updateDatabase();
@@ -137,7 +148,22 @@ public class DriverInfoUpdateActivity extends Activity {
 			driver.setDriverID(driverID);
 			updateDriverIDtextView();
 		}else{
-			//TODO
+			Query queryRef=DatabaseHandler.getDriversRef().orderByChild("driverID").equalTo(driver.getDriverID());
+			
+			queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+				
+				@Override
+				public void onDataChange(DataSnapshot snapshot) {
+					Firebase driverRef=snapshot.getRef();
+					driverRef.setValue(driver);
+				}
+				
+				@Override
+				public void onCancelled(FirebaseError arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+			});
 		}
 	}
 	

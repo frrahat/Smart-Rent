@@ -2,10 +2,12 @@ package com.frrahat.smartrent;
 
 import com.frrahat.smartrent.utils.DatabaseHandler;
 import com.frrahat.smartrent.utils.FileHandler;
+import com.frrahat.smartrent.utils.MessageThread;
 import com.frrahat.smartrent.utils.Passenger;
 import com.frrahat.smartrent.utils.TaxiRequest;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -62,9 +64,9 @@ public class DestinationInputActivity extends Activity {
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
-		if (id == R.id.action_settings) {
+		/*if (id == R.id.action_settings) {
 			return true;
-		}
+		}*/
 		if (id == R.id.action_resetLocalPassengerInfo) {
 			resetLocalPassengerInfo();
 			return true;
@@ -99,8 +101,19 @@ public class DestinationInputActivity extends Activity {
 		//pushing new request
 		String requestID=DatabaseHandler.getNewID(DatabaseHandler.getRequestsRef(), "requestID", taxiRequest);
 		
-		showToast("Request Sent");
-		//TODO advance to driver list
+		//MessageThread thread=new MessageThread(requestID, System.currentTimeMillis(), true);
+		//pushing new thread
+		//String threadID=DatabaseHandler.getNewID(DatabaseHandler.getThreadsRef(), "threadID", thread);
+		
+		showToast("Sending Request...");
+		//advance to Message Thread
+		Intent intent=new Intent(DestinationInputActivity.this, MessageThreadActivity.class);
+		intent.putExtra("locationString", addressEditText.getText().toString());
+		intent.putExtra("clientType", "passenger");
+		intent.putExtra("requestID", requestID);
+		//intent.putExtra("threadID", threadID);
+		
+		startActivity(intent);
 	}
 	
 	private void resetLocalPassengerInfo(){

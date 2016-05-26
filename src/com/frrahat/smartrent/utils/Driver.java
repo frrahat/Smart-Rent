@@ -25,8 +25,9 @@ public class Driver implements Serializable{
 		rating=0.0;
 	}
 
-	public Driver(String carNumber, String phoneNumber,
+	public Driver(String driverID, String carNumber, String phoneNumber,
 			boolean isAdvertisingLocation) {
+		this.driverID=driverID;
 		this.carNumber = carNumber;
 		this.phoneNumber = phoneNumber;
 		this.isAdvertisingLocation = isAdvertisingLocation;

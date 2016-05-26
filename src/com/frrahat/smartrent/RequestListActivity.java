@@ -1,6 +1,9 @@
 package com.frrahat.smartrent;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
@@ -11,13 +14,18 @@ import com.frrahat.smartrent.utils.TaxiRequest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -27,7 +35,8 @@ public class RequestListActivity extends Activity {
 	private ListView requestListView;
 	private BaseAdapter adapter;
 	
-	private ArrayList<TaxiRequest> requests;
+	private ArrayList<TaxiRequest> requestList;
+	private HashMap<String, Integer> passengerIDMap;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +46,8 @@ public class RequestListActivity extends Activity {
 		requestInfoTextView = (TextView) findViewById(R.id.textViewRequestInfo);
 		requestListView=(ListView) findViewById(R.id.listViewRequests);
 		
-		requests=new ArrayList<TaxiRequest>();
+		requestList=new ArrayList<TaxiRequest>();
+		passengerIDMap=new HashMap<String, Integer>();
 		
 		adapter = new BaseAdapter() {
 
@@ -50,13 +60,22 @@ public class RequestListActivity extends Activity {
 					view = layoutInflater.inflate(R.layout.request_list_item,
 							null);
 				}
+				LinearLayout linearLayout = (LinearLayout) view.findViewById(R.id.linearLayout_reqListItem);
 				TextView textView1 = (TextView) view.findViewById(R.id.text1);
 				TextView textView2 = (TextView) view.findViewById(R.id.text2);
+				TextView textView3 = (TextView) view.findViewById(R.id.text3);
 				
-				TaxiRequest request=requests.get(requests.size()-position-1);
-				textView1.setText(Integer.toString(position + 1) + ")  "+request.getPassengerID());
-				textView2.setText(request.getLocationString());
-
+				TaxiRequest request=requestList.get(requestList.size()-position-1);
+				textView1.setText(Integer.toString(position + 1) + ")  From Passenger - "+passengerIDMap.get(request.getPassengerID()));
+				textView2.setText("Destination : "+request.getLocationString());
+				
+				SimpleDateFormat sdf = new SimpleDateFormat("dd MMM,yyyy hh:mm a");    
+				Date resultdate = new Date(request.getRequestTime());				
+				textView3.setText("Time : "+sdf.format(resultdate));
+				
+				if(request.isAccepted()){
+					linearLayout.setBackgroundColor(Color.YELLOW);
+				}
 				return view;
 			}
 
@@ -67,19 +86,34 @@ public class RequestListActivity extends Activity {
 
 			@Override
 			public Object getItem(int position) {
-				return requests.get(requests.size()-position-1);
+				return requestList.get(requestList.size()-position-1);
 			}
 
 			@Override
 			public int getCount() {
-				return requests.size();
+				return requestList.size();
 			}
 		};
 
 		requestListView.setAdapter(adapter);
 		
 		
-		
+		requestListView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				Intent intent=new Intent(RequestListActivity.this, MessageThreadActivity.class);
+				TaxiRequest request=requestList.get(requestList.size()-position-1);
+				String headingText="Passenger - "+ passengerIDMap.get(request.getPassengerID())
+						+" wants to go to "+request.getLocationString();
+				intent.putExtra("locationString", request.getLocationString());
+				intent.putExtra("clientType", "driver");
+				intent.putExtra("requestID", request.getRequestID());
+				
+				startActivity(intent);
+			}
+		});
 		
 		
 		
@@ -113,7 +147,11 @@ public class RequestListActivity extends Activity {
 			@Override
 			public void onChildAdded(DataSnapshot snapshot, String previousChildKey) {
 				TaxiRequest newRequest = snapshot.getValue(TaxiRequest.class);
-				requests.add(newRequest);
+				requestList.add(newRequest);
+				Integer key=passengerIDMap.get(newRequest.getPassengerID());
+				if(key==null){
+					passengerIDMap.put(newRequest.getPassengerID(), passengerIDMap.size()+1);
+				}
 				adapter.notifyDataSetChanged();
 			}
 			
@@ -142,9 +180,9 @@ public class RequestListActivity extends Activity {
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
-		if (id == R.id.action_settings) {
+		/*if (id == R.id.action_settings) {
 			return true;
-		}
+		}*/
 		return super.onOptionsItemSelected(item);
 	}
 }

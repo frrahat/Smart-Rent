@@ -37,7 +37,7 @@
             android:ems="10"
             android:inputType="textPostalAddress"
             android:textCursorDrawable="@drawable/textcursor"
-            android:textSize="30sp" >
+            android:textSize="20sp" >
 
             <requestFocus />
         </EditText>

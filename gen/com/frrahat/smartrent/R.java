@@ -594,9 +594,9 @@ containing a value of this type.
     }
     public static final class id {
         public static final int RelativeLayout1=0x7f07002b;
-        public static final int action_resetLocalDriverInfo=0x7f07004c;
-        public static final int action_resetLocalPassengerInfo=0x7f07004b;
-        public static final int action_settings=0x7f07004a;
+        public static final int action_resetLocalDriverInfo=0x7f07004e;
+        public static final int action_resetLocalPassengerInfo=0x7f07004d;
+        public static final int action_settings=0x7f07004f;
         public static final int adjust_height=0x7f070009;
         public static final int adjust_width=0x7f070008;
         public static final int android_pay=0x7f070028;
@@ -633,6 +633,7 @@ containing a value of this type.
         public static final int icon_only=0x7f070002;
         public static final int light=0x7f070004;
         public static final int linearLayout1=0x7f070032;
+        public static final int linearLayout_reqListItem=0x7f070049;
         public static final int listView1=0x7f07003a;
         public static final int listViewRequests=0x7f07003c;
         public static final int logo_only=0x7f070019;
@@ -640,14 +641,14 @@ containing a value of this type.
         public static final int monochrome=0x7f070027;
         public static final int none=0x7f070007;
         public static final int normal=0x7f07000a;
-        public static final int place_autocomplete_clear_button=0x7f070042;
-        public static final int place_autocomplete_powered_by_google=0x7f070044;
-        public static final int place_autocomplete_prediction_primary_text=0x7f070046;
-        public static final int place_autocomplete_prediction_secondary_text=0x7f070047;
-        public static final int place_autocomplete_progress=0x7f070045;
-        public static final int place_autocomplete_search_button=0x7f070040;
-        public static final int place_autocomplete_search_input=0x7f070041;
-        public static final int place_autocomplete_separator=0x7f070043;
+        public static final int place_autocomplete_clear_button=0x7f070043;
+        public static final int place_autocomplete_powered_by_google=0x7f070045;
+        public static final int place_autocomplete_prediction_primary_text=0x7f070047;
+        public static final int place_autocomplete_prediction_secondary_text=0x7f070048;
+        public static final int place_autocomplete_progress=0x7f070046;
+        public static final int place_autocomplete_search_button=0x7f070041;
+        public static final int place_autocomplete_search_input=0x7f070042;
+        public static final int place_autocomplete_separator=0x7f070044;
         public static final int production=0x7f070010;
         public static final int sandbox=0x7f070012;
         public static final int satellite=0x7f07000b;
@@ -660,14 +661,16 @@ containing a value of this type.
         public static final int switchAdvertiseLocation=0x7f070037;
         public static final int terrain=0x7f07000c;
         public static final int test=0x7f070011;
-        public static final int text1=0x7f070048;
-        public static final int text2=0x7f070049;
+        public static final int text1=0x7f07004a;
+        public static final int text2=0x7f07004b;
+        public static final int text3=0x7f07004c;
         public static final int textView1=0x7f07002c;
         public static final int textView2=0x7f07002e;
         public static final int textView3=0x7f070035;
         public static final int textViewDriverID=0x7f070033;
         public static final int textViewMessageInfo=0x7f070039;
         public static final int textViewRequestInfo=0x7f07003b;
+        public static final int textView_threadTop=0x7f070040;
         public static final int wide=0x7f070001;
         public static final int wrap_content=0x7f070017;
     }
@@ -680,11 +683,12 @@ containing a value of this type.
         public static final int activity_message_list=0x7f030002;
         public static final int activity_request_list=0x7f030003;
         public static final int activity_smart_rent_main=0x7f030004;
-        public static final int place_autocomplete_fragment=0x7f030005;
-        public static final int place_autocomplete_item_powered_by_google=0x7f030006;
-        public static final int place_autocomplete_item_prediction=0x7f030007;
-        public static final int place_autocomplete_progress=0x7f030008;
-        public static final int request_list_item=0x7f030009;
+        public static final int activity_thread=0x7f030005;
+        public static final int place_autocomplete_fragment=0x7f030006;
+        public static final int place_autocomplete_item_powered_by_google=0x7f030007;
+        public static final int place_autocomplete_item_prediction=0x7f030008;
+        public static final int place_autocomplete_progress=0x7f030009;
+        public static final int request_list_item=0x7f03000a;
     }
     public static final class menu {
         public static final int destination_input=0x7f0b0000;
@@ -692,6 +696,7 @@ containing a value of this type.
         public static final int message_list=0x7f0b0002;
         public static final int request_list=0x7f0b0003;
         public static final int smart_rent_main=0x7f0b0004;
+        public static final int thread=0x7f0b0005;
     }
     public static final class raw {
         public static final int gtm_analytics=0x7f040000;
@@ -833,6 +838,7 @@ containing a value of this type.
         public static final int title_activity_driver_info_update=0x7f06003c;
         public static final int title_activity_message_list=0x7f06003d;
         public static final int title_activity_request_list=0x7f060040;
+        public static final int title_activity_thread=0x7f060041;
         public static final int txtEnterDestination=0x7f060039;
         public static final int txtGetCurrentLocation=0x7f060030;
         public static final int txtHireATaxi=0x7f060033;

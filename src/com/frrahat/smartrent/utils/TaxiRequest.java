@@ -13,6 +13,9 @@ public class TaxiRequest {
 	private String locationString;
 	private String passengerID;
 	private long requestTime;
+	private double fare;
+	private boolean isAccepted;
+	private int acceptedDriverID;
 	
 	public TaxiRequest() {
 	}
@@ -40,6 +43,24 @@ public class TaxiRequest {
 	public long getRequestTime() {
 		return requestTime;
 	}
+	
+	
+	public double getFare() {
+		return fare;
+	}
+	
+	
+	public int getAcceptedDriverID() {
+		return acceptedDriverID;
+	}
+
+	public void setAcceptedDriverID(int acceptedDriverID) {
+		this.acceptedDriverID = acceptedDriverID;
+	}
+
+	public boolean isAccepted() {
+		return isAccepted;
+	}
 
 	public void setLocationString(String locationString) {
 		this.locationString = locationString;
@@ -55,6 +76,14 @@ public class TaxiRequest {
 	
 	public void setRequestTime(long requestTime) {
 		this.requestTime = requestTime;
+	}
+	
+	public void setFare(double fare) {
+		this.fare = fare;
+	}
+
+	public void setAccepted(boolean isAccepted) {
+		this.isAccepted = isAccepted;
 	}
 
 }
