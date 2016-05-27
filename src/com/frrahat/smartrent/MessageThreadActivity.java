@@ -301,8 +301,10 @@ NotificationCenter.NotificationCenterDelegate {
 	 */
 	@Override
 	public void onBackPressed() {
-		Message message=new Message(requestID, MessageTypes.TEXT, "<leaving>", clientID, System.currentTimeMillis());
-        DatabaseHandler.getNewID(DatabaseHandler.getMessagesRef(getApplicationContext()), null, message);
+		if(taxiRequest!=null && !taxiRequest.getIsAccepted()){
+			Message message=new Message(requestID, MessageTypes.TEXT, "<leaving>", clientID, System.currentTimeMillis());
+			DatabaseHandler.getNewID(DatabaseHandler.getMessagesRef(getApplicationContext()), null, message);
+		}
         
         
         if("passenger".equals(clientType)){//deactivating request
