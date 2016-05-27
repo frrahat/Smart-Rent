@@ -21,7 +21,7 @@ public class ChatListAdapter extends BaseAdapter {
 
     private ArrayList<ChatMessage> chatMessages;
     private Context context;
-    public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("HH:mm");
+    public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("hh:mm a");
 
     public ChatListAdapter(ArrayList<ChatMessage> chatMessages, Context context) {
         this.chatMessages = chatMessages;
@@ -52,12 +52,12 @@ public class ChatListAdapter extends BaseAdapter {
         ViewHolder1 holder1;
         ViewHolder2 holder2;
 
-        if (message.getUserType() == UserType.SELF) {
+        if (message.getUserType() == UserType.OTHER) {
             if (convertView == null) {
                 v = LayoutInflater.from(context).inflate(R.layout.chat_user1_item, null, false);
                 holder1 = new ViewHolder1();
 
-
+                holder1.authorTextView = (TextView) v.findViewById(R.id.chat_author);
                 holder1.messageTextView = (TextView) v.findViewById(R.id.message_text);
                 holder1.timeTextView = (TextView) v.findViewById(R.id.time_text);
 
@@ -67,11 +67,12 @@ public class ChatListAdapter extends BaseAdapter {
                 holder1 = (ViewHolder1) v.getTag();
 
             }
-
+            
+            holder1.authorTextView.setText(message.getAuthor());
             holder1.messageTextView.setText(Emoji.replaceEmoji(message.getMessageText(), holder1.messageTextView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(16)));
             holder1.timeTextView.setText(SIMPLE_DATE_FORMAT.format(message.getMessageTime()));
 
-        } else if (message.getUserType() == UserType.OTHER) {
+        } else if (message.getUserType() == UserType.SELF) {
 
             if (convertView == null) {
                 v = LayoutInflater.from(context).inflate(R.layout.chat_user2_item, null, false);
@@ -120,6 +121,7 @@ public class ChatListAdapter extends BaseAdapter {
     }
 
     private class ViewHolder1 {
+    	public TextView authorTextView;
         public TextView messageTextView;
         public TextView timeTextView;
 

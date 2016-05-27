@@ -8,8 +8,11 @@
 
     <com.frrahat.smartrent.widgets.ChatLayout
         android:layout_marginLeft="20dp"
-        android:layout_width="wrap_content" android:id="@+id/bubble" android:layout_alignParentRight="true" android:layout_alignParentEnd="true"
-        android:layout_height="wrap_content" android:background="@drawable/balloon_outgoing_normal">
+        android:layout_width="wrap_content" 
+        android:id="@+id/bubble" 
+        android:layout_alignParentEnd="true"
+        android:layout_height="wrap_content" 
+        android:background="@drawable/balloon_outgoing_normal">
 
         <ImageView
             android:id="@+id/user_reply_status"
@@ -17,9 +20,7 @@
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/message_text"
             android:layout_marginBottom="5dp"
-            android:layout_marginRight="10dp"
             android:layout_marginEnd="10dp"
-            android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
 
 
@@ -35,9 +36,7 @@
 
             android:textColor="@color/gray"
             android:paddingBottom="5dp"
-            android:layout_marginRight="2dp"
             android:layout_marginEnd="2dp"
-            android:layout_toLeftOf="@id/user_reply_status"
             android:layout_toStartOf="@id/user_reply_status"
             android:text="17:10" />
 

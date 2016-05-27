@@ -31,6 +31,8 @@ import android.widget.TextView;
 
 public class RequestListActivity extends Activity {
 	
+	private String driverID;
+	
 	private TextView requestInfoTextView;
 	private ListView requestListView;
 	private BaseAdapter adapter;
@@ -42,6 +44,8 @@ public class RequestListActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_request_list);
+		
+		driverID=getIntent().getStringExtra("driverID");
 		
 		requestInfoTextView = (TextView) findViewById(R.id.textViewRequestInfo);
 		requestListView=(ListView) findViewById(R.id.listViewRequests);
@@ -64,6 +68,7 @@ public class RequestListActivity extends Activity {
 				TextView textView1 = (TextView) view.findViewById(R.id.text1);
 				TextView textView2 = (TextView) view.findViewById(R.id.text2);
 				TextView textView3 = (TextView) view.findViewById(R.id.text3);
+				TextView textView4 = (TextView) view.findViewById(R.id.text4);
 				
 				TaxiRequest request=requestList.get(requestList.size()-position-1);
 				textView1.setText(Integer.toString(position + 1) + ")  From Passenger - "+passengerIDMap.get(request.getPassengerID()));
@@ -73,6 +78,13 @@ public class RequestListActivity extends Activity {
 				Date resultdate = new Date(request.getRequestTime());				
 				textView3.setText("Time : "+sdf.format(resultdate));
 
+				if(request.getIsAccepted()){//deactivated
+					textView4.setTextColor(Color.RED);
+					textView4.setText("•Not available");
+				}
+				else{
+					textView4.setText("•Available");
+				}
 				return view;
 			}
 
@@ -102,11 +114,10 @@ public class RequestListActivity extends Activity {
 					int position, long id) {
 				Intent intent=new Intent(RequestListActivity.this, MessageThreadActivity.class);
 				TaxiRequest request=requestList.get(requestList.size()-position-1);
-				String headingText="Passenger - "+ passengerIDMap.get(request.getPassengerID())
-						+" wants to go to "+request.getLocationString();
 				intent.putExtra("locationString", request.getLocationString());
 				intent.putExtra("clientType", "driver");
 				intent.putExtra("requestID", request.getRequestID());
+				intent.putExtra("clientID", driverID);
 				
 				startActivity(intent);
 			}

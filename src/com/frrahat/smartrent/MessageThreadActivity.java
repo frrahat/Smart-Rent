@@ -1,11 +1,7 @@
 package com.frrahat.smartrent;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
@@ -17,6 +13,9 @@ import com.frrahat.smartrent.model.ChatMessage;
 import com.frrahat.smartrent.model.Status;
 import com.frrahat.smartrent.model.UserType;
 import com.frrahat.smartrent.utils.DatabaseHandler;
+import com.frrahat.smartrent.utils.Message;
+import com.frrahat.smartrent.utils.MessageTypes;
+import com.frrahat.smartrent.utils.TaxiRequest;
 import com.frrahat.smartrent.widgets.Emoji;
 import com.frrahat.smartrent.widgets.EmojiView;
 import com.frrahat.smartrent.widgets.SizeNotifierRelativeLayout;
@@ -37,19 +36,20 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 public class MessageThreadActivity extends Activity 
 implements SizeNotifierRelativeLayout.SizeNotifierRelativeLayoutDelegate, 
 NotificationCenter.NotificationCenterDelegate {
-	
-	private TextView headingTextView;
-	
+		
 	private String clientType;
 	private HashMap<String, Integer> driverIDMap;
+	private String requestID;
+	private String clientID;
+	private TaxiRequest taxiRequest;
 	
 	
 	
@@ -65,6 +65,76 @@ NotificationCenter.NotificationCenterDelegate {
 	private boolean keyboardVisible;
 	private WindowManager.LayoutParams windowLayoutParams;
 	
+	InputMethodManager inputMethodManager;
+	Query messagesQueryRef;
+	
+	private EditText.OnKeyListener keyListener = new View.OnKeyListener() {
+        @Override
+        public boolean onKey(View v, int keyCode, KeyEvent event) {
+
+            // If the event is a key-down event on the "enter" button
+            if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
+                    (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                // Perform action on key press
+
+                EditText editText = (EditText) v;
+
+                if(v==chatEditText1)
+                {
+                    sendMessage(editText.getText().toString(), UserType.SELF);
+                }
+
+                chatEditText1.setText("");
+                hideSoftKeyboard();
+
+                return true;
+            }
+            return false;
+
+        }
+    };
+
+    private ImageView.OnClickListener clickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+
+            if(v==enterChatView1)
+            {
+                sendMessage(chatEditText1.getText().toString(), UserType.SELF);
+            }
+
+            chatEditText1.setText("");
+            hideSoftKeyboard();
+
+        }
+    };
+
+    private final TextWatcher watcher1 = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+            if (chatEditText1.getText().toString().equals("")) {
+
+            } else {
+                enterChatView1.setImageResource(R.drawable.ic_chat_send);
+
+            }
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            if(editable.length()==0){
+                enterChatView1.setImageResource(R.drawable.ic_chat_send);
+            }else{
+                enterChatView1.setImageResource(R.drawable.ic_chat_send_active);
+            }
+        }
+    };
+    
+    
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -73,19 +143,19 @@ NotificationCenter.NotificationCenterDelegate {
 		Intent intent=getIntent();
 		String locationString=intent.getStringExtra("locationString");
 		clientType=intent.getStringExtra("clientType");
+		clientID=intent.getStringExtra("clientID");
+		requestID=intent.getStringExtra("requestID");
 		
+		getTaxiRequest();
+				
 		getActionBar().setTitle("Destination : "+locationString);
 		
-		headingTextView=(TextView) findViewById(R.id.textView_threadTop);	
-		
-		if("passenger".equals(clientType)){
-			headingTextView.setText("Waiting for the drivers to respond");
-		}else{
-			headingTextView.setText("Send enqueries to the passenger.");
-		}
-		
-		
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+		
+		inputMethodManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+		
+		driverIDMap=new HashMap<String, Integer>();
+		interfaceWithTheDatabase();
 		
 		
 		AndroidUtilities.statusBarHeight = getStatusBarHeight();
@@ -133,6 +203,128 @@ NotificationCenter.NotificationCenterDelegate {
 		
 	}
 	
+	
+	private void getTaxiRequest(){
+		Query queryRequestRef=DatabaseHandler.getRequestsRef(getApplicationContext())
+				.orderByChild("requestID").equalTo(requestID);
+
+		queryRequestRef.addListenerForSingleValueEvent(new ValueEventListener() {
+			
+			@Override
+			public void onDataChange(DataSnapshot snapshot) {
+				taxiRequest=snapshot.child(requestID).getValue(TaxiRequest.class);
+				if(listAdapter!=null)
+		            listAdapter.notifyDataSetChanged();
+			}
+			
+			@Override
+			public void onCancelled(FirebaseError arg0) {
+				
+			}
+		});
+	}
+	/**
+	 * 
+	 */
+	private void interfaceWithTheDatabase() {
+		messagesQueryRef=DatabaseHandler.getMessagesRef(getApplicationContext())
+				.orderByChild("requestID").equalTo(requestID);
+		
+		messagesQueryRef.addChildEventListener(new ChildEventListener() {
+				
+			@Override
+			public void onChildAdded(DataSnapshot snapshot, String previousChild) {
+				Message message=snapshot.getValue(Message.class);
+				if(message.getAuthorID().equals(clientID)){//client
+					if(message.getMessageType()==MessageTypes.TEXT){
+						ChatMessage chatMessage = new ChatMessage(message.getMessageData(),
+								UserType.SELF,Status.SENT,clientID, message.getTime());
+
+						chatMessages.add(chatMessage);
+
+				        if(listAdapter!=null)
+				            listAdapter.notifyDataSetChanged();
+					}
+				}
+				else{//other
+					if(message.getMessageType()==MessageTypes.TEXT){
+						String author="";
+						String authorID=message.getAuthorID();
+						if(taxiRequest==null){
+							author="**";
+						}
+						else if("driver".equals(clientType) && taxiRequest.getPassengerID().equals(authorID)){
+							author="Passenger";
+						}
+						else {//now the other one is always a driver
+							Integer id=driverIDMap.get(authorID);
+							if(id==null){
+								id=driverIDMap.size()+1;
+								driverIDMap.put(authorID, id);
+							}
+							author="Driver-"+id;
+						}
+						ChatMessage chatMessage = new ChatMessage(message.getMessageData(),
+								UserType.OTHER,Status.SENT,author, message.getTime());
+				        chatMessages.add(chatMessage);
+
+				        if(listAdapter!=null)
+				            listAdapter.notifyDataSetChanged();
+					}
+				}
+			}
+			
+			@Override
+			public void onChildRemoved(DataSnapshot arg0) {
+				
+			}
+			
+			@Override
+			public void onChildMoved(DataSnapshot arg0, String arg1) {
+				
+			}
+			
+			@Override
+			public void onChildChanged(DataSnapshot arg0, String arg1) {
+				
+			}
+			
+			@Override
+			public void onCancelled(FirebaseError arg0) {
+				
+			}
+		});
+	}
+
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onBackPressed()
+	 */
+	@Override
+	public void onBackPressed() {
+		Message message=new Message(requestID, MessageTypes.TEXT, "<leaving>", clientID, System.currentTimeMillis());
+        DatabaseHandler.getNewID(DatabaseHandler.getMessagesRef(getApplicationContext()), null, message);
+        
+        
+        if("passenger".equals(clientType)){//deactivating request
+        	Query queryRequestRef=DatabaseHandler.getRequestsRef(getApplicationContext())
+    				.orderByChild("requestID").equalTo(requestID);
+
+    		queryRequestRef.addListenerForSingleValueEvent(new ValueEventListener() {
+    			
+    			@Override
+    			public void onDataChange(DataSnapshot snapshot) {
+    				Firebase requestRef=snapshot.child(requestID).getRef();
+    				requestRef.child("isAccepted").setValue(true);
+    			}
+    			
+    			@Override
+    			public void onCancelled(FirebaseError arg0) {
+    				
+    			}
+    		});
+        }
+		super.onBackPressed();
+	}
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -153,87 +345,18 @@ NotificationCenter.NotificationCenterDelegate {
 	}
 	
 	
-	private EditText.OnKeyListener keyListener = new View.OnKeyListener() {
-        @Override
-        public boolean onKey(View v, int keyCode, KeyEvent event) {
-
-            // If the event is a key-down event on the "enter" button
-            if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
-                    (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                // Perform action on key press
-
-                EditText editText = (EditText) v;
-
-                if(v==chatEditText1)
-                {
-                    sendMessage(editText.getText().toString(), UserType.OTHER);
-                }
-
-                chatEditText1.setText("");
-
-                return true;
-            }
-            return false;
-
-        }
-    };
-
-    private ImageView.OnClickListener clickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-
-            if(v==enterChatView1)
-            {
-                sendMessage(chatEditText1.getText().toString(), UserType.OTHER);
-            }
-
-            chatEditText1.setText("");
-
-        }
-    };
-
-    private final TextWatcher watcher1 = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
-        }
-
-        @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
-            if (chatEditText1.getText().toString().equals("")) {
-
-            } else {
-                enterChatView1.setImageResource(R.drawable.ic_chat_send);
-
-            }
-        }
-
-        @Override
-        public void afterTextChanged(Editable editable) {
-            if(editable.length()==0){
-                enterChatView1.setImageResource(R.drawable.ic_chat_send);
-            }else{
-                enterChatView1.setImageResource(R.drawable.ic_chat_send_active);
-            }
-        }
-    };
+	
     
     
     private void sendMessage(final String messageText, final UserType userType)
     {
-        if(messageText.trim().length()==0)
-            return;
+        /*if(messageText.trim().length()==0)
+            return;*/
+    	//pushing new message
+        Message message=new Message(requestID, MessageTypes.TEXT, messageText, clientID, System.currentTimeMillis());
+        DatabaseHandler.getNewID(DatabaseHandler.getMessagesRef(getApplicationContext()), null, message);
 
-        final ChatMessage message = new ChatMessage();
-        message.setMessageStatus(Status.SENT);
-        message.setMessageText(messageText);
-        message.setUserType(userType);
-        message.setMessageTime(new Date().getTime());
-        chatMessages.add(message);
-
-        if(listAdapter!=null)
-            listAdapter.notifyDataSetChanged();
-
-        // Mark message as delivered after one second
+        /*// Mark message as delivered after one second
 
         final ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
 
@@ -257,7 +380,7 @@ NotificationCenter.NotificationCenterDelegate {
 
 
             }
-        }, 1, TimeUnit.SECONDS);
+        }, 1, TimeUnit.SECONDS);*/
 
     }
 
@@ -305,7 +428,7 @@ NotificationCenter.NotificationCenterDelegate {
 
 
                 windowLayoutParams = new WindowManager.LayoutParams();
-                windowLayoutParams.gravity = Gravity.BOTTOM | Gravity.LEFT;
+                windowLayoutParams.gravity = Gravity.BOTTOM | Gravity.START;
                 if (Build.VERSION.SDK_INT >= 21) {
                     windowLayoutParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
                 } else {
@@ -503,5 +626,9 @@ NotificationCenter.NotificationCenterDelegate {
         super.onPause();
 
         hideEmojiPopup();
+    }
+    
+    private void hideSoftKeyboard(){
+    	inputMethodManager.hideSoftInputFromWindow(chatEditText1.getWindowToken(), 0);
     }
 }

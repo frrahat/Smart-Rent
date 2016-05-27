@@ -19,7 +19,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/chat_company_reply_author"
+                android:id="@+id/chat_author"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingLeft="20dp"
@@ -27,7 +27,7 @@
                 android:paddingTop="5dp"
                 android:textStyle="bold"
                 android:textColor="@color/light_blue"
-                android:text="User1"
+                android:text="Me"
                 android:textSize="16sp" />
 
             <TextView

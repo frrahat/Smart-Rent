@@ -46,12 +46,20 @@ public class DatabaseHandler {
 		return rootRef.child("Threads");
 	}
 	
+	public static Firebase getMessagesRef(Context context){
+		if(rootRef==null)
+			initialize(context);
+		return rootRef.child("Messages");
+	}
+	
 	public static String getNewID(Firebase ref,String IDfieldString,Object object){
 		Firebase newRef=ref.push();
 		newRef.setValue(object);
 		
 		String ID=newRef.getKey();
-		newRef.child(IDfieldString).setValue(ID);
+		if(IDfieldString!=null){
+			newRef.child(IDfieldString).setValue(ID);
+		}
 		
 		return ID;
 	}

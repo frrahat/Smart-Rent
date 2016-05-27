@@ -2,7 +2,9 @@ package com.frrahat.smartrent;
 
 import com.frrahat.smartrent.utils.DatabaseHandler;
 import com.frrahat.smartrent.utils.FileHandler;
+import com.frrahat.smartrent.utils.Message;
 import com.frrahat.smartrent.utils.MessageThread;
+import com.frrahat.smartrent.utils.MessageTypes;
 import com.frrahat.smartrent.utils.Passenger;
 import com.frrahat.smartrent.utils.TaxiRequest;
 
@@ -111,7 +113,13 @@ public class DestinationInputActivity extends Activity {
 		intent.putExtra("locationString", addressEditText.getText().toString());
 		intent.putExtra("clientType", "passenger");
 		intent.putExtra("requestID", requestID);
+		intent.putExtra("clientID", passenger.getPassengerID());
 		//intent.putExtra("threadID", threadID);
+		
+		//pushing a request message
+		Message message =new Message(requestID, MessageTypes.TEXT, "Anyone ready to take me to "+addressEditText.getText(), 
+				passenger.getPassengerID(), System.currentTimeMillis());
+		DatabaseHandler.getNewID(DatabaseHandler.getMessagesRef(getApplicationContext()), null, message);
 		
 		startActivity(intent);
 	}

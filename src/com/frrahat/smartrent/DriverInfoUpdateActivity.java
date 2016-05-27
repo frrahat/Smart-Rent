@@ -119,13 +119,13 @@ public class DriverInfoUpdateActivity extends Activity {
 	}
 	
 	public void updateDriverIDtextView(){
-		driverIDtextView.setText(driver.getDriverID());
+		driverIDtextView.setText(driver.getDriverID().substring(1));
 	}
 	
 	private void setFieldsFromLocal(){
 		driver=FileHandler.getDriverFromLocalStorage(getApplicationContext());
 		driverIDtextView.setText((driver.getDriverID()==null?"Not set yet":
-			driver.getDriverID()));
+			driver.getDriverID().substring(1)));
 		
 		carNumberEditText.setText(driver.getCarNumber());
 		if(driver.getCarNumber()!=null)
@@ -154,7 +154,7 @@ public class DriverInfoUpdateActivity extends Activity {
 				
 				@Override
 				public void onDataChange(DataSnapshot snapshot) {
-					Firebase driverRef=snapshot.getRef();
+					Firebase driverRef=snapshot.child(driver.getDriverID()).getRef();
 					driverRef.setValue(driver);
 				}
 				
