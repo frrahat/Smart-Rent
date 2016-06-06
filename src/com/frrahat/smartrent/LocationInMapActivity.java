@@ -30,7 +30,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import android.content.Intent;
@@ -61,7 +60,7 @@ public class LocationInMapActivity extends FragmentActivity
     private GoogleApiClient mGoogleApiClient;
     private TextView mMessageView;
     
-    private LatLng sourceLatLng, destinationLatLng;
+    private LatLng sourceLatLng,requestedLatLng,destinationLatLng;
     
     private GoogleMap mMap;
 
@@ -91,7 +90,7 @@ public class LocationInMapActivity extends FragmentActivity
         Intent intent=getIntent();
         sourceLatLng=new LatLng(intent.getDoubleExtra("sLatitude", 0),
         		intent.getDoubleExtra("sLongitude", 0));
-        destinationLatLng=new LatLng(intent.getDoubleExtra("dLatitude", 0),
+        requestedLatLng=new LatLng(intent.getDoubleExtra("dLatitude", 0),
         		intent.getDoubleExtra("dLongitude", 0));
     }
 
@@ -114,15 +113,23 @@ public class LocationInMapActivity extends FragmentActivity
         map.setMyLocationEnabled(true);
         map.setOnMyLocationButtonClickListener(this);
         
-        if(sourceLatLng.latitude!=0 && sourceLatLng.longitude!=0){
-            map.addMarker(new MarkerOptions().position(sourceLatLng).title("Source"));
-        }
-        if(destinationLatLng.latitude!=0 && destinationLatLng.longitude!=0){
-            map.addMarker(new MarkerOptions().position(destinationLatLng).title("Destination"));
-        }
+        showSelectedFromToPoints(map);
     }
+    
 
     /**
+	 * @param map
+	 */
+	private void showSelectedFromToPoints(GoogleMap map) {
+		if(sourceLatLng.latitude!=0 && sourceLatLng.longitude!=0){
+            map.addMarker(new MarkerOptions().position(sourceLatLng).title("From"));
+        }
+        if(requestedLatLng.latitude!=0 && requestedLatLng.longitude!=0){
+            map.addMarker(new MarkerOptions().position(requestedLatLng).title("To"));
+        }
+	}
+
+	/**
      * Button to get current Location. This demonstrates how to get the current Location as required
      * without needing to register a LocationListener.
      */
@@ -219,9 +226,10 @@ public class LocationInMapActivity extends FragmentActivity
 		destinationLatLng=point;
 		Toast.makeText(getApplicationContext(), point.toString(), Toast.LENGTH_SHORT).show();
 		mMap.clear();
+		showSelectedFromToPoints(mMap);
 		mMap.addMarker(new MarkerOptions()
 				.position(point)
-				.title("Destination")
+				.title("Marker")
 				.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
 	}
 }

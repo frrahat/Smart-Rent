@@ -70,10 +70,24 @@ public class DestinationInputActivity extends Activity
 		});
 		
 		mGoogleApiClient = new GoogleApiClient.Builder(this)
-				.addApi(LocationServices.API).addConnectionCallbacks(this)
-				.addOnConnectionFailedListener(this).build();
+				.addApi(LocationServices.API)
+				.addConnectionCallbacks(this)
+				.addOnConnectionFailedListener(this)
+				.build();
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		mGoogleApiClient.connect();
 	}
 
+	@Override
+	public void onPause() {
+		super.onPause();
+		mGoogleApiClient.disconnect();
+	}
+    
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -175,14 +189,13 @@ public class DestinationInputActivity extends Activity
 			}
 			
 			if(isValidPointLocation){
-				pointLocationMessage.setMessageType(MessageTypes.LatLng);
 				pointLocationMessage.setMessageData(sLatitude+","+sLongitude+","+parts[0]+","+parts[1]);
 				
 			}
 		}
+		DatabaseHandler.getNewID(DatabaseHandler.getMessagesRef(getApplicationContext()), null, pointLocationMessage);
 		Message message =new Message(requestID, MessageTypes.TEXT, "Anyone ready to take me to "+addressEditText.getText(), 
 					passenger.getPassengerID(), System.currentTimeMillis());
-		DatabaseHandler.getNewID(DatabaseHandler.getMessagesRef(getApplicationContext()), null, pointLocationMessage);
 		DatabaseHandler.getNewID(DatabaseHandler.getMessagesRef(getApplicationContext()), null, message);
 		
 		//advance to Message Thread

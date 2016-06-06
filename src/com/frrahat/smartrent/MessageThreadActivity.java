@@ -251,7 +251,7 @@ NotificationCenter.NotificationCenterDelegate {
 				            listAdapter.notifyDataSetChanged();
 					}
 					else if(message.getMessageType()==MessageTypes.LatLng){
-						updateSourceDestPoint(message);
+						updateSourceDestPoint(message.getMessageData());
 					}
 				}
 				else{//other
@@ -282,14 +282,13 @@ NotificationCenter.NotificationCenterDelegate {
 					
 					else if(message.getMessageType()==MessageTypes.LatLng){
 						//if("Passenger".equals(author)){
-							updateSourceDestPoint(message);
+							updateSourceDestPoint(message.getMessageData());
 						//}
 					}
 				}
 			}
 
-			private void updateSourceDestPoint(Message message) {
-				String data=message.getMessageData();
+			private void updateSourceDestPoint(String data) {
 				String parts[]=data.split(",");
 				
 				if(parts.length<4)
