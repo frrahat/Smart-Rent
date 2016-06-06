@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	
+
     <string name="app_name">Smart Rent</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
@@ -21,11 +21,12 @@
     <string name="title_activity_driver_info_update">Driver Info Update</string>
     <string name="title_activity_message_list">Messages</string>
     <string name="txtMessageInfo">Foo</string>
-    <string name="txtRequestInfo">Waiting for new requests</string>  
+    <string name="txtRequestInfo">Waiting for new requests</string>
     <string name="title_activity_request_list">Requests</string>
-	<string name="title_activity_thread">Message Threads</string>
-	
+    <string name="title_activity_thread">Message Threads</string>
     <string name="type_your_message">Enter msg</string>
     <string name="NoRecent">No recent</string>
+    <string name="title_activity_map">Map</string>
+    <string name="my_location">My Location</string>
 
 </resources>

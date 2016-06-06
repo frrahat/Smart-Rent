@@ -20,6 +20,7 @@ import com.frrahat.smartrent.widgets.Emoji;
 import com.frrahat.smartrent.widgets.EmojiView;
 import com.frrahat.smartrent.widgets.SizeNotifierRelativeLayout;
 import com.frrahat.smartrent.widgets.SizeNotifierRelativeLayout.SizeNotifierRelativeLayoutDelegate;
+import com.google.android.gms.maps.model.LatLng;
 
 import android.app.Activity;
 import android.content.Context;
@@ -40,6 +41,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 public class MessageThreadActivity extends Activity 
 implements SizeNotifierRelativeLayout.SizeNotifierRelativeLayoutDelegate, 
@@ -67,6 +69,9 @@ NotificationCenter.NotificationCenterDelegate {
 	
 	InputMethodManager inputMethodManager;
 	Query messagesQueryRef;
+	
+	private LatLng sourceLatLng;
+	private LatLng destLatLng;
 	
 	private EditText.OnKeyListener keyListener = new View.OnKeyListener() {
         @Override
@@ -235,7 +240,7 @@ NotificationCenter.NotificationCenterDelegate {
 			@Override
 			public void onChildAdded(DataSnapshot snapshot, String previousChild) {
 				Message message=snapshot.getValue(Message.class);
-				if(message.getAuthorID().equals(clientID)){//client
+				if(message.getAuthorID().equals(clientID)){//client himself
 					if(message.getMessageType()==MessageTypes.TEXT){
 						ChatMessage chatMessage = new ChatMessage(message.getMessageData(),
 								UserType.SELF,Status.SENT,clientID, message.getTime());
@@ -245,25 +250,28 @@ NotificationCenter.NotificationCenterDelegate {
 				        if(listAdapter!=null)
 				            listAdapter.notifyDataSetChanged();
 					}
+					else if(message.getMessageType()==MessageTypes.LatLng){
+						updateSourceDestPoint(message);
+					}
 				}
 				else{//other
+					String author="";
+					String authorID=message.getAuthorID();
+					if(taxiRequest==null){
+						author="**";
+					}
+					else if("driver".equals(clientType) && taxiRequest.getPassengerID().equals(authorID)){
+						author="Passenger";
+					}
+					else {//now the other one is always a driver
+						Integer id=driverIDMap.get(authorID);
+						if(id==null){
+							id=driverIDMap.size()+1;
+							driverIDMap.put(authorID, id);
+						}
+						author="Driver-"+id;
+					}
 					if(message.getMessageType()==MessageTypes.TEXT){
-						String author="";
-						String authorID=message.getAuthorID();
-						if(taxiRequest==null){
-							author="**";
-						}
-						else if("driver".equals(clientType) && taxiRequest.getPassengerID().equals(authorID)){
-							author="Passenger";
-						}
-						else {//now the other one is always a driver
-							Integer id=driverIDMap.get(authorID);
-							if(id==null){
-								id=driverIDMap.size()+1;
-								driverIDMap.put(authorID, id);
-							}
-							author="Driver-"+id;
-						}
 						ChatMessage chatMessage = new ChatMessage(message.getMessageData(),
 								UserType.OTHER,Status.SENT,author, message.getTime());
 				        chatMessages.add(chatMessage);
@@ -271,7 +279,26 @@ NotificationCenter.NotificationCenterDelegate {
 				        if(listAdapter!=null)
 				            listAdapter.notifyDataSetChanged();
 					}
+					
+					else if(message.getMessageType()==MessageTypes.LatLng){
+						//if("Passenger".equals(author)){
+							updateSourceDestPoint(message);
+						//}
+					}
 				}
+			}
+
+			private void updateSourceDestPoint(Message message) {
+				String data=message.getMessageData();
+				String parts[]=data.split(",");
+				
+				if(parts.length<4)
+					return;
+				
+				sourceLatLng = new LatLng(Double.parseDouble(parts[0]), 
+						Double.parseDouble(parts[1]));
+				destLatLng = new LatLng(Double.parseDouble(parts[2]), 
+							Double.parseDouble(parts[3]));
 			}
 			
 			@Override
@@ -340,7 +367,22 @@ NotificationCenter.NotificationCenterDelegate {
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
-		if (id == R.id.action_settings) {
+		if (id == R.id.action_show_in_map) {
+			Intent intent=new Intent(MessageThreadActivity.this, LocationInMapActivity.class);
+			if(sourceLatLng!=null){
+				intent.putExtra("sLatitude", sourceLatLng.latitude);
+				intent.putExtra("sLongitude", sourceLatLng.longitude);
+			}
+			if(destLatLng!=null){
+				intent.putExtra("dLatitude", destLatLng.latitude);
+				intent.putExtra("dLongitude", destLatLng.longitude);
+			}
+			if(sourceLatLng!=null || destLatLng!=null){
+				startActivity(intent);
+			}
+			else{
+				Toast.makeText(getApplicationContext(), "Location Parsing Failure", Toast.LENGTH_SHORT).show();
+			}
 			return true;
 		}
 		return super.onOptionsItemSelected(item);

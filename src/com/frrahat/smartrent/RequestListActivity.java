@@ -8,6 +8,7 @@ import java.util.HashMap;
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.frrahat.smartrent.utils.DatabaseHandler;
 import com.frrahat.smartrent.utils.TaxiRequest;
 
@@ -83,6 +84,7 @@ public class RequestListActivity extends Activity {
 					textView4.setText("•Not available");
 				}
 				else{
+					textView4.setTextColor(Color.GREEN);
 					textView4.setText("•Available");
 				}
 				return view;
@@ -132,6 +134,20 @@ public class RequestListActivity extends Activity {
 		
 		
 		//===========================================================
+		DatabaseHandler.getRequestsRef(getApplicationContext()).addValueEventListener(new ValueEventListener() {
+			
+			@Override
+			public void onDataChange(DataSnapshot arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onCancelled(FirebaseError arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 		DatabaseHandler.getRequestsRef(getApplicationContext()).addChildEventListener(new ChildEventListener() {
 			
 			@Override
@@ -148,8 +164,7 @@ public class RequestListActivity extends Activity {
 			
 			@Override
 			public void onChildChanged(DataSnapshot arg0, String arg1) {
-				// TODO Auto-generated method stub
-				
+				//adapter.notifyDataSetChanged();
 			}
 			
 			@Override

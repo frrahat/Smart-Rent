@@ -3,13 +3,21 @@ package com.frrahat.smartrent;
 import com.frrahat.smartrent.utils.DatabaseHandler;
 import com.frrahat.smartrent.utils.FileHandler;
 import com.frrahat.smartrent.utils.Message;
-import com.frrahat.smartrent.utils.MessageThread;
 import com.frrahat.smartrent.utils.MessageTypes;
 import com.frrahat.smartrent.utils.Passenger;
 import com.frrahat.smartrent.utils.TaxiRequest;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,13 +27,22 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class DestinationInputActivity extends Activity {
+public class DestinationInputActivity extends Activity 
+	implements
+	ConnectionCallbacks,
+	OnConnectionFailedListener{
 	
 	EditText addressEditText;
 	Button btnPointDestInMap;
 	Button btnSend;
 	
 	Passenger passenger;
+	
+	private final int pointDestReqCode=123;
+	
+	private GoogleApiClient mGoogleApiClient;
+	
+	private LatLng sourceLocation;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +68,10 @@ public class DestinationInputActivity extends Activity {
 				performActionOnSendButtonClick();
 			}
 		});
+		
+		mGoogleApiClient = new GoogleApiClient.Builder(this)
+				.addApi(LocationServices.API).addConnectionCallbacks(this)
+				.addOnConnectionFailedListener(this).build();
 	}
 
 	@Override
@@ -82,7 +103,23 @@ public class DestinationInputActivity extends Activity {
 	}
 	
 	private void pointDestInMap() {
-		System.out.println("TODO : need to be implemented");
+		Intent intent=new Intent(DestinationInputActivity.this, LocationInMapActivity.class);
+		startActivityForResult(intent, pointDestReqCode);
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		//super.onActivityResult(requestCode, resultCode, data);
+		if(requestCode==pointDestReqCode && resultCode==RESULT_OK){
+			LatLng destLatLng=new LatLng(data.getDoubleExtra("latitude", 0),
+					data.getDoubleExtra("longitude", 0));
+			
+			if(destLatLng.latitude ==0 && destLatLng.longitude==0)
+				return;
+			
+			addressEditText.setText("LatLng=("+Double.toString(destLatLng.latitude)+","+
+			Double.toString(destLatLng.longitude)+")");
+		}
 	}
 	
 	private void performActionOnSendButtonClick(){
@@ -108,19 +145,54 @@ public class DestinationInputActivity extends Activity {
 		//String threadID=DatabaseHandler.getNewID(DatabaseHandler.getThreadsRef(), "threadID", thread);
 		
 		showToast("Sending Request...");
+		
+		
+    	String sLatitude="0";
+    	String sLongitude="0";
+    	
+    	if(!updateLocation())
+    		return;
+    	
+    	if(sourceLocation!=null){
+    		sLatitude=Double.toString(sourceLocation.latitude);
+    		sLongitude=Double.toString(sourceLocation.longitude);
+    	}
+		//pushing a request message
+		String locationString=addressEditText.getText().toString();
+
+		Message pointLocationMessage =new Message(requestID, MessageTypes.LatLng, sLatitude+","+sLongitude+",0,0", 
+				passenger.getPassengerID(), System.currentTimeMillis());
+		if(locationString.startsWith("LatLng=(")){
+			boolean isValidPointLocation;
+			String parts[]=locationString.substring(8, locationString.length()-1).split(",");
+			
+			try{
+				Double.parseDouble(parts[0]);
+				Double.parseDouble(parts[1]);
+				isValidPointLocation=true;
+			}catch(NumberFormatException | ArrayIndexOutOfBoundsException e){
+				isValidPointLocation=false;
+			}
+			
+			if(isValidPointLocation){
+				pointLocationMessage.setMessageType(MessageTypes.LatLng);
+				pointLocationMessage.setMessageData(sLatitude+","+sLongitude+","+parts[0]+","+parts[1]);
+				
+			}
+		}
+		Message message =new Message(requestID, MessageTypes.TEXT, "Anyone ready to take me to "+addressEditText.getText(), 
+					passenger.getPassengerID(), System.currentTimeMillis());
+		DatabaseHandler.getNewID(DatabaseHandler.getMessagesRef(getApplicationContext()), null, pointLocationMessage);
+		DatabaseHandler.getNewID(DatabaseHandler.getMessagesRef(getApplicationContext()), null, message);
+		
 		//advance to Message Thread
 		Intent intent=new Intent(DestinationInputActivity.this, MessageThreadActivity.class);
-		intent.putExtra("locationString", addressEditText.getText().toString());
+		intent.putExtra("locationString", locationString);
 		intent.putExtra("clientType", "passenger");
 		intent.putExtra("requestID", requestID);
 		intent.putExtra("clientID", passenger.getPassengerID());
 		//intent.putExtra("threadID", threadID);
-		
-		//pushing a request message
-		Message message =new Message(requestID, MessageTypes.TEXT, "Anyone ready to take me to "+addressEditText.getText(), 
-				passenger.getPassengerID(), System.currentTimeMillis());
-		DatabaseHandler.getNewID(DatabaseHandler.getMessagesRef(getApplicationContext()), null, message);
-		
+				
 		startActivity(intent);
 	}
 	
@@ -129,5 +201,53 @@ public class DestinationInputActivity extends Activity {
 		FileHandler.savePassengerToLocalStorage(getApplicationContext(), passenger);
 		
 		showToast("Deleted");
+	}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+    
+	
+	
+	
+	
+
+	private boolean updateLocation(){
+		Location location=LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+		if(location!=null){
+			sourceLocation=new LatLng(location.getLatitude(), location.getLongitude());
+			return true;
+		}
+		else{
+			showToast("Couldn't get your current location. Make sure location is enabled on the device");
+			return false;
+		}
+	}
+    
+	@Override
+    public void onConnectionSuspended(int cause) {
+        // Do nothing
+    }
+
+    /**
+     * Implementation of {@link OnConnectionFailedListener}.
+     */
+    @Override
+    public void onConnectionFailed(ConnectionResult result) {
+        Toast.makeText(getApplicationContext(), "Conection Failure", Toast.LENGTH_SHORT).show();
+    }
+
+	/* (non-Javadoc)
+	 * @see com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks#onConnected(android.os.Bundle)
+	 */
+	@Override
+	public void onConnected(Bundle arg0) {
+		//updateLocation();
 	}
 }

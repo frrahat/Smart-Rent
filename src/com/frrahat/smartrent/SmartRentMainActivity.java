@@ -52,6 +52,15 @@ public class SmartRentMainActivity extends Activity {
 		btnHireATaxi=(Button) findViewById(R.id.buttonHireATaxi);
 		btnIfDriver=(Button) findViewById(R.id.buttonIfDriver);
 		
+		btnGetCurrentLocation.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Intent intent=new Intent(SmartRentMainActivity.this, LocationInMapActivity.class);
+				startActivity(intent);
+			}
+		});
+		
 		btnHireATaxi.setOnClickListener(new OnClickListener() {
 			
 			@Override
