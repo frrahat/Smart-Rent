@@ -2,6 +2,8 @@ package com.frrahat.smartrent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
@@ -13,6 +15,7 @@ import com.frrahat.smartrent.model.ChatMessage;
 import com.frrahat.smartrent.model.Status;
 import com.frrahat.smartrent.model.UserType;
 import com.frrahat.smartrent.utils.DatabaseHandler;
+import com.frrahat.smartrent.utils.Driver;
 import com.frrahat.smartrent.utils.Message;
 import com.frrahat.smartrent.utils.MessageTypes;
 import com.frrahat.smartrent.utils.TaxiRequest;
@@ -23,9 +26,12 @@ import com.frrahat.smartrent.widgets.SizeNotifierRelativeLayout.SizeNotifierRela
 import com.google.android.gms.maps.model.LatLng;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
@@ -38,6 +44,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -357,6 +364,9 @@ NotificationCenter.NotificationCenterDelegate {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.thread, menu);
+		if("driver".equals(getIntent().getStringExtra("clientType"))){
+			((MenuItem)menu.findItem(R.id.action_call_driver)).setVisible(false);
+		}
 		return true;
 	}
 
@@ -383,6 +393,10 @@ NotificationCenter.NotificationCenterDelegate {
 				Toast.makeText(getApplicationContext(), "Location Parsing Failure", Toast.LENGTH_SHORT).show();
 			}
 			return true;
+		}
+		
+		if(id == R.id.action_call_driver) {
+			showCallListDialog();
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -673,5 +687,68 @@ NotificationCenter.NotificationCenterDelegate {
     
     private void hideSoftKeyboard(){
     	inputMethodManager.hideSoftInputFromWindow(chatEditText1.getWindowToken(), 0);
+    }
+    
+    
+    private void showCallListDialog(){
+    	AlertDialog.Builder builderSingle = new AlertDialog.Builder(MessageThreadActivity.this);
+    	builderSingle.setIcon(R.drawable.ic_launcher);
+    	builderSingle.setTitle("Select Callee:-");
+
+    	final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+    	        MessageThreadActivity.this,
+    	        android.R.layout.select_dialog_singlechoice);
+    	
+	    for(int i=0;i<driverIDMap.size();i++){
+	    	arrayAdapter.add("Call Driver : "+Integer.toString(i+1));
+	    }
+
+    	builderSingle.setNegativeButton(
+    	        "cancel",
+    	        new DialogInterface.OnClickListener() {
+    	            @Override
+    	            public void onClick(DialogInterface dialog, int which) {
+    	                dialog.dismiss();
+    	            }
+    	        });
+
+    	builderSingle.setAdapter(
+    	        arrayAdapter,
+    	        new DialogInterface.OnClickListener() {
+    	            @Override
+    	            public void onClick(DialogInterface dialog, int position) {
+    	            	for(String key : driverIDMap.keySet()){
+
+    	            		if(driverIDMap.get(key)==position+1){
+    	            			callDriver(key);
+    	            			break;
+    	            		}
+    	            	}
+    	            }
+    	        });
+    	builderSingle.show();
+    }
+    
+    private void callDriver(final String driverID){
+    	//Toast.makeText(getApplicationContext(), "Calling "+driverID, Toast.LENGTH_SHORT).show();
+    	
+    	Query driverQuery=DatabaseHandler.getDriversRef(getApplicationContext())
+				.orderByChild("driverID").equalTo(driverID);
+    	
+    	driverQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+			
+			@Override
+			public void onDataChange(DataSnapshot snapshot) {
+				Driver driver=snapshot.child(driverID).getValue(Driver.class);
+				String number=driver.getPhoneNumber();
+				//Toast.makeText(getApplicationContext(), number, Toast.LENGTH_SHORT).show();
+				Intent callIntent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:"+number)); 
+		        startActivity(callIntent);
+			}
+			
+			@Override
+			public void onCancelled(FirebaseError arg0) {				
+			}
+		});
     }
 }

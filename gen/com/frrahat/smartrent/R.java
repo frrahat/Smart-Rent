@@ -638,6 +638,7 @@ containing a value of this type.
     public static final class id {
         public static final int LinearLayout=0x7f070056;
         public static final int RelativeLayout1=0x7f07002b;
+        public static final int action_call_driver=0x7f07005f;
         public static final int action_done=0x7f07005d;
         public static final int action_resetLocalDriverInfo=0x7f07005c;
         public static final int action_resetLocalPassengerInfo=0x7f07005b;

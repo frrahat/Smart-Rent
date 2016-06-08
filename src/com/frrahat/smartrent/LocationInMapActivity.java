@@ -26,11 +26,13 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMyLocationButtonClickListener;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import android.content.Intent;
 import android.location.Location;
@@ -61,6 +63,7 @@ public class LocationInMapActivity extends FragmentActivity
     private TextView mMessageView;
     
     private LatLng sourceLatLng,requestedLatLng,destinationLatLng;
+    private Location currentLocation;
     
     private GoogleMap mMap;
 
@@ -121,11 +124,32 @@ public class LocationInMapActivity extends FragmentActivity
 	 * @param map
 	 */
 	private void showSelectedFromToPoints(GoogleMap map) {
+		boolean hasSourceLatLng=false, hasRequestedLatLng=false;
 		if(sourceLatLng.latitude!=0 && sourceLatLng.longitude!=0){
-            map.addMarker(new MarkerOptions().position(sourceLatLng).title("From"));
+			hasSourceLatLng=true;
+		}
+		if(requestedLatLng.latitude!=0 && requestedLatLng.longitude!=0){
+			hasRequestedLatLng=true;
+		}
+		if(hasSourceLatLng){
+            map.addMarker(new MarkerOptions().position(sourceLatLng).title("From")
+            		.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+            
+            float zoom=Math.max(map.getCameraPosition().zoom,16f);
+            //map.animateCamera(CameraUpdateFactory.newLatLng(sourceLatLng));
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(sourceLatLng,zoom));
         }
-        if(requestedLatLng.latitude!=0 && requestedLatLng.longitude!=0){
-            map.addMarker(new MarkerOptions().position(requestedLatLng).title("To"));
+        if(hasRequestedLatLng){
+            map.addMarker(new MarkerOptions().position(requestedLatLng).title("To")
+            		.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+            
+            if(hasSourceLatLng){
+            	map.addPolyline((new PolylineOptions())
+            			.width(1f)
+                        .add(sourceLatLng, requestedLatLng));
+            }
+            //map.animateCamera(CameraUpdateFactory.newLatLngZoom(sourceLatLng, 10f));
+            //map.animateCamera(CameraUpdateFactory.newLatLngZoom(requestedLatLng, 16f));
         }
 	}
 
@@ -146,6 +170,7 @@ public class LocationInMapActivity extends FragmentActivity
      */
     @Override
     public void onLocationChanged(Location location) {
+    	this.currentLocation=location;
     	double latitude=location.getLatitude();
     	double longitude=location.getLongitude();
         mMessageView.setText("Current Location = (" + Double.toString(latitude)+","+Double.toString(longitude)+")");
@@ -180,7 +205,12 @@ public class LocationInMapActivity extends FragmentActivity
 
     @Override
     public boolean onMyLocationButtonClick() {
-        Toast.makeText(this, "Showing Current Location", Toast.LENGTH_SHORT).show();
+    	if(currentLocation==null){
+            Toast.makeText(this, "Location is null. Check your network connection.", Toast.LENGTH_SHORT).show();
+    	}
+    	else{
+    		Toast.makeText(this, "Showing Current Location", Toast.LENGTH_SHORT).show();
+    	}
         // Return false so that we don't consume the event and the default behavior still occurs
         // (the camera animates to the user's current position).
         return false;
@@ -232,4 +262,18 @@ public class LocationInMapActivity extends FragmentActivity
 				.title("Marker")
 				.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
 	}
+	
+	/*private void addArrow(GoogleMap map, LatLng from, LatLng to){
+		double fromLat = Math.toRadians(from.latitude);
+        double fromLng = Math.toRadians(from.longitude);
+        double toLat = Math.toRadians(to.latitude);
+        double toLng = Math.toRadians(to.longitude);
+        double dLat = toLat - fromLat;
+        double dLng = toLng - fromLng;
+        
+        double angle=Math.atan2(dLng,dLat);
+        double heading = atan2(
+                Math.sin(dLng) * Math.cos(toLat),
+                Math.cos(fromLat) * Math.sin(toLat) - Math.sin(fromLat) * Math.cos(toLat) * cos(dLng));
+	}*/
 }
