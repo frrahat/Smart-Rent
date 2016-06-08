@@ -163,14 +163,26 @@ public class RequestListActivity extends Activity {
 			}
 			
 			@Override
-			public void onChildChanged(DataSnapshot arg0, String arg1) {
-				//adapter.notifyDataSetChanged();
+			public void onChildChanged(DataSnapshot snapshot, String prevChildKey) {
+				TaxiRequest updatedRequest = snapshot.getValue(TaxiRequest.class);
+				//requestInfoTextView.setText(updatedRequest.getRequestID());
+				for(int i=requestList.size()-1;i>=0;i--){
+					TaxiRequest request=requestList.get(i);
+
+					if(request.getRequestTime().equals(updatedRequest.getRequestTime())
+							&& request.getPassengerID().equals(updatedRequest.getPassengerID())){
+
+						requestList.set(i, updatedRequest);
+						adapter.notifyDataSetChanged();
+						break;
+					}
+				}
 			}
 			
 			@Override
 			public void onChildAdded(DataSnapshot snapshot, String previousChildKey) {
 				TaxiRequest newRequest = snapshot.getValue(TaxiRequest.class);
-				requestList.add(newRequest);
+				requestList.add(newRequest); 
 				Integer key=passengerIDMap.get(newRequest.getPassengerID());
 				if(key==null){
 					passengerIDMap.put(newRequest.getPassengerID(), passengerIDMap.size()+1);
